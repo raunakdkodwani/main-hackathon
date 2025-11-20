@@ -1,0 +1,371 @@
+
+<div class="min-h-screen font-sans">
+  @switch (currentView()) {
+    @case ('login') {
+      <div class="flex items-center justify-center min-h-screen bg-gray-100">
+        <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
+          <div class="text-center">
+            <svg class="mx-auto h-12 w-auto text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm1.25 0h.008v.008h-.008V10.5Zm-12 0h.008v.008h-.008V10.5Z" />
+            </svg>
+            <h2 class="mt-6 text-3xl font-bold tracking-tight text-gray-900">SmartSpend Login</h2>
+            <p class="mt-2 text-sm text-gray-600">Expense Governance System</p>
+          </div>
+          <form class="mt-8 space-y-6" (submit)="$event.preventDefault(); handleLogin()">
+            <div class="space-y-4 rounded-md shadow-sm">
+              <div>
+                <label for="employee-id" class="sr-only">Employee ID</label>
+                <input id="employee-id" name="employee-id" type="text" required class="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm" placeholder="Employee ID (e.g., E1001 or A2001)" [value]="loginId()" (input)="loginId.set($event.target.value)">
+              </div>
+              <div>
+                <label for="password" class="sr-only">Password</label>
+                <input id="password" name="password" type="password" required class="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm" placeholder="Password" [value]="loginPassword()" (input)="loginPassword.set($event.target.value)">
+              </div>
+            </div>
+            @if (loginError()) {
+              <div class="text-sm text-red-600 font-medium p-3 bg-red-50 rounded-md">
+                {{ loginError() }}
+              </div>
+            }
+            <div>
+              <button type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-3 px-4 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Sign in
+              </button>
+            </div>
+            <div class="text-xs text-gray-500 text-center">
+              <p>Employee Credentials: E1001 / pass123</p>
+              <p>Admin Credentials: A2001 / admin123</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+    @case ('employee') {
+      <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md flex flex-col">
+          <div class="p-4 border-b">
+            <h1 class="text-2xl font-bold text-blue-600">SmartSpend</h1>
+            <p class="text-sm text-gray-500">Employee Portal</p>
+          </div>
+          <div class="p-4 flex-grow">
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm font-medium text-gray-700">Welcome,</p>
+                <p class="text-lg font-bold text-gray-900">{{ loggedInUser()?.name }}</p>
+                <p class="text-xs text-gray-500">{{ loggedInUser()?.department }} | Grade {{ loggedInUser()?.grade }}</p>
+            </div>
+          </div>
+          <div class="p-4 border-t">
+            <button (click)="logout()" class="w-full flex items-center justify-center gap-2 rounded-md bg-gray-200 py-2 px-4 text-sm font-medium text-gray-800 hover:bg-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Submit Expense Form -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm">
+              <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Submit New Expense</h2>
+              <form class="space-y-4" (submit)="$event.preventDefault(); submitExpense()">
+                <div>
+                  <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                  <input type="text" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" [value]="newExpenseDescription()" (input)="newExpenseDescription.set($event.target.value)" required>
+                  @if (newExpenseAiSuggestion()) {
+                    <p class="text-xs text-blue-600 mt-1">{{ newExpenseAiSuggestion() }}</p>
+                  }
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700">Amount (₹)</label>
+                    <input type="number" id="amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" [value]="newExpenseAmount()" (input)="newExpenseAmount.set($event.target.valueAsNumber)" required>
+                  </div>
+                  <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                    <input type="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" [value]="newExpenseDate()" (input)="newExpenseDate.set($event.target.value)" required>
+                  </div>
+                </div>
+                <div>
+                  <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                  <select id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" [value]="newExpenseCategory()" (change)="newExpenseCategory.set(+$event.target.value)" required>
+                    <option [value]="null" disabled selected>Select a category</option>
+                    @for (cat of eligibleCategories(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.name }} (Limit: ₹{{ cat.limit.toLocaleString() }})</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Upload Bill</label>
+                  <div class="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6">
+                    <div class="space-y-1 text-center">
+                       <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                      <div class="flex text-sm text-gray-600">
+                        <label for="file-upload" class="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500">
+                          <span>Upload a file</span>
+                          <input id="file-upload" name="file-upload" type="file" class="sr-only" (change)="handleFileChange($event)">
+                        </label>
+                        <p class="pl-1">or drag and drop</p>
+                      </div>
+                      @if (newExpenseFileName()) {
+                        <p class="text-xs text-gray-500">{{ newExpenseFileName() }}</p>
+                      } @else {
+                        <p class="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
+                      }
+                    </div>
+                  </div>
+                </div>
+                @if (newExpensePolicyViolations().length > 0) {
+                  <div class="p-3 bg-red-100 border-l-4 border-red-500 rounded-r-lg">
+                    <p class="font-bold text-red-800 text-sm">Policy Violation Alert</p>
+                    <ul class="list-disc list-inside text-sm text-red-700 mt-1">
+                      @for(violation of newExpensePolicyViolations(); track $index) {
+                        <li>{{ violation }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+                <button type="submit" [disabled]="newExpenseSubmitting()" class="w-full flex justify-center items-center gap-2 rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-300">
+                  @if (newExpenseSubmitting()) {
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Submitting...</span>
+                  } @else {
+                    <span>Submit Claim</span>
+                  }
+                </button>
+              </form>
+            </div>
+            
+            <!-- My Claims & Limits -->
+            <div class="lg:col-span-2 space-y-8">
+              <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Quarterly Limits</h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-gray-600">Total Cap:</span>
+                    <span class="font-bold text-lg text-gray-800">₹{{ loggedInUser()?.quarterlyCap.toLocaleString() }}</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="bg-blue-500 h-4 rounded-full" [style.width.%]="(availedAmount() / loggedInUser()!.quarterlyCap) * 100"></div>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-green-600 font-medium">Remaining: ₹{{ remainingAmount().toLocaleString() }}</span>
+                    <span class="text-red-600 font-medium">Availed: ₹{{ availedAmount().toLocaleString() }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">My Claims History</h3>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                      <tr>
+                        <th scope="col" class="px-4 py-3">Date</th>
+                        <th scope="col" class="px-4 py-3">Description</th>
+                        <th scope="col" class="px-4 py-3">Category</th>
+                        <th scope="col" class="px-4 py-3">Amount</th>
+                        <th scope="col" class="px-4 py-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (claim of userClaims(); track claim.id) {
+                        <tr class="bg-white border-b hover:bg-gray-50">
+                          <td class="px-4 py-3">{{ claim.date }}</td>
+                          <td class="px-4 py-3 font-medium text-gray-900">{{ claim.description }}</td>
+                          <td class="px-4 py-3">{{ getCategoryName(claim.categoryId) }}</td>
+                          <td class="px-4 py-3">₹{{ claim.amount.toLocaleString() }}</td>
+                          <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                              [class.bg-yellow-100]="claim.status === 'Pending'" [class.text-yellow-800]="claim.status === 'Pending'"
+                              [class.bg-green-100]="claim.status === 'Approved'" [class.text-green-800]="claim.status === 'Approved'"
+                              [class.bg-red-100]="claim.status === 'Declined'" [class.text-red-800]="claim.status === 'Declined'">
+                              {{ claim.status }}
+                            </span>
+                          </td>
+                        </tr>
+                      } @empty {
+                        <tr>
+                          <td colspan="5" class="text-center py-8 text-gray-500">No claims submitted yet.</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    }
+    @case ('admin') {
+      <div class="flex h-screen bg-gray-100">
+        <!-- Admin Sidebar -->
+        <div class="w-64 bg-gray-800 text-white flex flex-col">
+          <div class="p-4 border-b border-gray-700">
+            <h1 class="text-2xl font-bold">SmartSpend</h1>
+            <p class="text-sm text-gray-400">Admin Dashboard</p>
+          </div>
+          <nav class="flex-grow p-4 space-y-2">
+            <button (click)="adminSelectedTab.set('approvals')" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium" [class.bg-gray-900]="adminSelectedTab() === 'approvals'" [class.hover:bg-gray-700]="adminSelectedTab() !== 'approvals'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 0 6.75 5.625v1.5a3.375 3.375 0 0 0 3.375 3.375h.375m0-3.375h2.25m-2.25 0h3.375M3 18.75h18" /></svg>
+              Claim Approvals
+            </button>
+            <button (click)="adminSelectedTab.set('employees')" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium" [class.bg-gray-900]="adminSelectedTab() === 'employees'" [class.hover:bg-gray-700]="adminSelectedTab() !== 'employees'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-4.663M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /></svg>
+              Employee Management
+            </button>
+            <button (click)="adminSelectedTab.set('insights')" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium" [class.bg-gray-900]="adminSelectedTab() === 'insights'" [class.hover:bg-gray-700]="adminSelectedTab() !== 'insights'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h12M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-12a2.25 2.25 0 0 1-2.25-2.25V3M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12h.008v.008H16.5V12Zm-3 0h.008v.008H13.5V12Zm-3 0h.008v.008H10.5V12Z" /></svg>
+              Reports & AI Insights
+            </button>
+            <button (click)="adminSelectedTab.set('policy')" class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium" [class.bg-gray-900]="adminSelectedTab() === 'policy'" [class.hover:bg-gray-700]="adminSelectedTab() !== 'policy'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12-3-3m0 0-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+              Policy Documents
+            </button>
+          </nav>
+          <div class="p-4 border-t border-gray-700">
+             <div class="p-3 bg-gray-700 rounded-lg">
+                <p class="text-sm font-medium text-gray-300">Admin User:</p>
+                <p class="text-lg font-bold text-white">{{ loggedInUser()?.name }}</p>
+            </div>
+            <button (click)="logout()" class="mt-4 w-full flex items-center justify-center gap-2 rounded-md bg-gray-600 py-2 px-4 text-sm font-medium text-white hover:bg-gray-500">
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+          @switch (adminSelectedTab()) {
+            @case ('approvals') {
+              <h2 class="text-3xl font-bold text-gray-800 mb-6">Pending Claim Approvals</h2>
+              <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table class="w-full text-sm text-left text-gray-500">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3">Employee</th>
+                      <th class="px-6 py-3">Details</th>
+                      <th class="px-6 py-3">Amount</th>
+                      <th class="px-6 py-3">Risk Score</th>
+                      <th class="px-6 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (claim of pendingClaims(); track claim.id) {
+                      <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                          <div class="font-medium text-gray-900">{{ getUserName(claim.employeeId) }}</div>
+                          <div class="text-xs text-gray-500">{{ claim.employeeId }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                          <div class="font-medium text-gray-900">{{ claim.description }}</div>
+                          <div class="text-xs text-gray-500">{{ getCategoryName(claim.categoryId) }} on {{ claim.date }}</div>
+                        </td>
+                        <td class="px-6 py-4 font-semibold text-gray-800">₹{{ claim.amount.toLocaleString() }}</td>
+                        <td class="px-6 py-4">
+                          <div class="flex items-center gap-2">
+                             <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="h-2.5 rounded-full" [style.width.%]="claim.riskScore"
+                                [class.bg-green-500]="claim.riskScore < 30"
+                                [class.bg-yellow-400]="claim.riskScore >= 30 && claim.riskScore < 70"
+                                [class.bg-red-500]="claim.riskScore >= 70"></div>
+                            </div>
+                            <span class="font-bold text-sm"
+                                [class.text-green-600]="claim.riskScore < 30"
+                                [class.text-yellow-600]="claim.riskScore >= 30 && claim.riskScore < 70"
+                                [class.text-red-600]="claim.riskScore >= 70">{{ claim.riskScore }}</span>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4">
+                          <div class="flex gap-2">
+                            <button (click)="updateClaimStatus(claim.id, 'Approved')" class="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700">Approve</button>
+                            <button (click)="updateClaimStatus(claim.id, 'Declined')" class="px-3 py-1 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Decline</button>
+                          </div>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="5" class="text-center py-10 text-gray-500">No pending claims. Great job!</td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            @case ('employees') {
+              <h2 class="text-3xl font-bold text-gray-800 mb-6">Employee Management</h2>
+              <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table class="w-full text-sm text-left text-gray-500">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3">ID</th>
+                      <th class="px-6 py-3">Name</th>
+                      <th class="px-6 py-3">Department</th>
+                      <th class="px-6 py-3">Grade</th>
+                      <th class="px-6 py-3">Quarterly Cap</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (user of users(); track user.id) {
+                      <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-mono text-gray-700">{{ user.id }}</td>
+                        <td class="px-6 py-4 font-medium text-gray-900">{{ user.name }}</td>
+                        <td class="px-6 py-4">{{ user.department }}</td>
+                        <td class="px-6 py-4">{{ user.grade }}</td>
+                        <td class="px-6 py-4">₹{{ user.quarterlyCap.toLocaleString() }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            @case ('insights') {
+              <h2 class="text-3xl font-bold text-gray-800 mb-6">Reports & AI Insights</h2>
+              <div class="space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 class="font-bold text-xl mb-4">AI Insight Agent</h3>
+                  <p class="text-sm text-gray-600 mb-2">Ask a question about expense data in natural language.</p>
+                  <textarea class="w-full rounded-md border-gray-300" rows="3" placeholder="e.g., 'Which department spent the most on client entertainment this quarter?'"></textarea>
+                  <button class="mt-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Get Insights</button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 class="font-bold text-xl mb-4">Audit Summarization Agent</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                      <h4 class="font-semibold text-gray-800">Department Summary (Q3)</h4>
+                      <p class="text-sm text-gray-600 mt-2">The <strong>Client Entertainment</strong> department had the highest expenditure at ₹22,000, driven by a single large event. <strong>Finance</strong> remains the most frugal department with total claims of ₹2,500. Marketing and HR show moderate spending within their budgets.</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                      <h4 class="font-semibold text-gray-800">Employee Summary (Top Spender)</h4>
+                      <p class="text-sm text-gray-600 mt-2"><strong>Karan Patel (A2002)</strong> is the top spender this quarter with a pending claim of ₹22,000 for a tech conference. This claim has a high risk score of 65 and requires careful review. All other employees are well within their individual limits.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            @case ('policy') {
+               <h2 class="text-3xl font-bold text-gray-800 mb-6">Company Expense Policies</h2>
+               <div class="bg-white p-6 rounded-lg shadow-sm">
+                 <h3 class="font-bold text-xl mb-4">Upload New Policy Document</h3>
+                 <p class="text-sm text-gray-600 mb-4">Upload the latest company expense policy in PDF format. This document will be used by AI agents for more accurate validation.</p>
+                 <div class="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6">
+                    <div class="space-y-1 text-center">
+                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mx-auto h-12 w-12 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                      <div class="flex text-sm text-gray-600 justify-center">
+                        <label for="policy-upload" class="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500">
+                          <span>Select a PDF document</span>
+                          <input id="policy-upload" name="policy-upload" type="file" class="sr-only" accept=".pdf">
+                        </label>
+                      </div>
+                      <p class="text-xs text-gray-500">PDF only, up to 20MB</p>
+                    </div>
+                  </div>
+                  <button class="mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Upload Policy</button>
+               </div>
+            }
+          }
+        </main>
+      </div>
+    }
+  }
+</div>
